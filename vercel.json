@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "pnpm --filter @repo/shared build && pnpm --filter web build",
+  "installCommand": "pnpm install",
+  "functions": {
+    "apps/web/app/api/**/*": {
+      "maxDuration": 60
+    }
+  }
+}
