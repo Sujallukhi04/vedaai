@@ -56,33 +56,36 @@ vedaai/
 
 ## 3. Core Technical Subsystems
 
-### 3.1 Flexible Question Number Normalization Engine (`packages/shared/normalize.ts`)
+### 3.1 Flexible Question Number Normalization & Parent Prefix Matching (`packages/shared/normalize.ts`)
 - Cleans and standardizes printed and handwritten question labels:
   - **`"A 1"` / `"A. 1"` / `"A-1"`** ➔ Normalized to **`"1"`**
   - **`"Ans 1"` / `"Ans. 1"` / `"Answer 1"`** ➔ Normalized to **`"1"`**
   - **`"Ans. 1(a)"` / `"A 1(a)"`** ➔ Normalized to **`"1a"`**
   - **`"Sol 3"` / `"Solution 3"`** ➔ Normalized to **`"3"`**
   - **`"Q. 4"` / `"Question 4"`** ➔ Normalized to **`"4"`**
-- Enables 100% direct label matching regardless of student handwriting style.
+- **Parent Question Prefix Resolution**: If a student labels their answer as `3(a)`, `3.a`, or `3a`, and the exam paper lists question `3`, the system extracts parent prefix `3` (`extractParentQuestionNumber("3a")` ➔ `"3"`), mapping `3(a)` directly to Question `3`!
 
 ### 3.2 Dynamic OCR Line Extraction Engine (`apps/web/lib/ocr.ts`)
 - Primary scanning powered by OCR.space Handwriting API engine.
 - Extracts line-by-line bounding coordinates `[x, y, w, h]` normalized between `0.0` and `1.0`.
 - Exponential backoff retry logic (up to 3 retries) handles API rate limits.
 
-### 3.3 100% Groq AI Extraction & Grading Engine (`apps/web/lib/ai.ts` & `apps/web/lib/grok.ts`)
-- Uses Groq's high-speed inference API (`openai/gpt-oss-120b` / `llama-3.3-70b-versatile`).
-- **Question Paper Extraction**: Parses question numbers, prompt text, maximum marks, and sub-parts.
-- **Answer Segment Clustering**: Groups adjacent handwritten lines into non-overlapping answer blocks (`ans-1`, `ans-2`, `ans-3(a)`). Identifies unnumbered scratch calculations as `ans-rough`.
+### 3.3 Active 100% Groq AI Models (`apps/web/lib/ai.ts` & `apps/web/lib/grok.ts`)
+- Uses active high-performance production models on Groq API:
+  1. **`openai/gpt-oss-120b`**: Primary high-intelligence model for question parsing, line clustering & grading.
+  2. **`openai/gpt-oss-20b`**: Fast lightweight fallback model.
+  3. **`qwen/qwen3.8-27b`**: High-accuracy instruction backup model.
+- Automatically retries across fallback models if any single model hits a temporary limit.
 
 ### 3.4 1–10 Mapping Confidence Score Calculator
 - Computes mapping certainty based on detection signals:
-  - **10/10 Confidence**: Direct printed question label match (e.g., segment `A 1` or `Ans 3(a)` matched to Question `1` or `3(a)`).
+  - **10/10 Confidence**: Direct printed question label match (e.g., segment `A 1` or `Ans 3(a)` matched to Question `1` or `3`).
   - **8/10 Confidence**: Semantic text/topic match without explicit label.
   - **5/10 Confidence**: Ambiguous or multi-candidate match requiring teacher review.
 
 ### 3.5 Minimal Step-by-Step Processing Screen (`ProcessingProgress.tsx`)
 - Displays a clean 5-step pipeline checklist card with active loading spinners (`Loader2 animate-spin`), green checkmarks (`CheckCircle2`), and step index badges.
+- Dynamically omits the 5th AI Grading step when `enableGrading: false`.
 
 ### 3.6 Interactive Dual-Viewport Split Screen (`TeacherSplitScreenFigma.tsx`)
 - **Header Badge**: Rounded integer overall grade score pill (e.g., **`58% GRADE`**).
@@ -97,5 +100,5 @@ vedaai/
 ## 4. Key Performance Optimizations
 
 1. **Single Source of Truth**: All data models and interfaces are exported strictly from `@repo/shared` (`packages/shared/types.ts`).
-2. **Monorepo Build Integrity**: Zero build warnings or errors across Next.js App Router (`pnpm --filter web build` passes cleanly).
+2. **Monorepo Build Integrity**: Zero build warnings or errors across Next.js App Router (`npm run build` passes cleanly).
 3. **Fluid Responsive UI**: Custom Tailwind grid breakpoints (`md:grid-cols-12`) ensure side-by-side split screen on desktop viewports and tabbed view on mobile.

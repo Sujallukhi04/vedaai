@@ -1,15 +1,15 @@
 # 🎓 VedaAI — AI Academic Assessment Suite
 
-VedaAI is a full-stack monorepo application built with Next.js 14 App Router, Tailwind CSS, TypeScript, and the 100% Groq AI Engine (`llama-3.3-70b-versatile`). It automates exam question extraction, student handwriting segmentation, question-answer mapping with 1–10 confidence scoring, and automated teacher evaluation.
+VedaAI is a full-stack monorepo application built with Next.js 14 App Router, Tailwind CSS, TypeScript, and the 100% Groq AI Engine (`openai/gpt-oss-120b`). It automates exam question extraction, student handwriting segmentation, question-answer mapping with 1–10 confidence scoring, and automated teacher evaluation.
 
 ---
 
 ## 🌟 Key Features
 
-- **Flexible Student Label Matching**: Recognizes handwritten answer labels like `A 1`, `A-1`, `A.1`, `Ans 1`, `Ans. 1`, `Answer 1`, `Sol 1`, `Solution 1`, `Q1`, `1(a)`.
-- **100% Groq AI Vision Engine**: High-speed OCR line clustering and structured question extraction.
+- **Flexible Student Label & Parent Prefix Matching**: Recognizes handwritten answer labels like `A 1`, `A-1`, `A.1`, `Ans 1`, `Ans. 1`, `Answer 1`, `Sol 1`, `Q1`, `1(a)` and maps sub-labels like `3(a)` directly to parent Question `3`.
+- **Active 100% Groq AI Models**: Uses high-speed live production models (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`) with automatic model failover retries.
 - **1–10 Confidence Score Mapping**: Direct label matching (10/10), semantic topic matching (8/10), and ambiguous candidate tagging (5/10).
-- **Minimal Pipeline Progress View**: Clean 5-step checklist card with live step spinners and completion checkmarks.
+- **Minimal Pipeline Progress View**: Clean 5-step checklist card with live step spinners, completion checkmarks, and dynamic step filtering when auto-grading is toggled off.
 - **Interactive Dual-Viewport Workspace**: 2-column layout (`md:grid-cols-12`) with question cards on the left and pixel-perfect SVG bounding box PDF viewer on the right.
 - **Single Source of Truth Architecture**: Monorepo package (`@repo/shared`) for unified type safety across all components and API routes.
 
