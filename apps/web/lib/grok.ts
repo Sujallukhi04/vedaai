@@ -7,10 +7,10 @@ export async function callGroqJSON<T>(systemPrompt: string, userPrompt: string):
   }
 
   const models = [
-    "llama-3.3-70b-versatile",
-    "llama3-70b-8192",
-    "llama3-8b-8192",
-    "gemma2-9b-it"
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
+    "qwen/qwen3.6-27b"
   ];
 
   let lastError: Error | null = null;

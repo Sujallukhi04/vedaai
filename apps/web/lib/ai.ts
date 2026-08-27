@@ -7,7 +7,7 @@ import {
   Grade,
   GradeSummary
 } from "@repo/shared";
-import { normalizeQuestionNumber } from "@repo/shared";
+import { normalizeQuestionNumber, extractParentQuestionNumber } from "@repo/shared";
 import { callGroqJSON, gradeAnswersWithGroq } from "./grok";
 import { performLocalOCR, processOCRIntoAnswerSegments, OCRPageResult, OCRLine } from "./ocr";
 
@@ -548,9 +548,10 @@ export async function mapAnswersToQuestions(
     }
 
     const normSeg = normalizeQuestionNumber(seg.detectedNumber);
-    const exactMatches = questionMapByNorm.get(normSeg);
+    const parentSegNorm = normalizeQuestionNumber(extractParentQuestionNumber(seg.detectedNumber));
+    const exactMatches = questionMapByNorm.get(normSeg) || (parentSegNorm ? questionMapByNorm.get(parentSegNorm) : undefined);
 
-    if (exactMatches && exactMatches.length === 1) {
+    if (exactMatches && exactMatches.length >= 1) {
       const matchedQ = exactMatches[0];
       console.log(
         `[mapAnswersToQuestions] PRE-AI MATCH SUCCESS: Segment '${seg.id}' (detectedNumber: '${seg.detectedNumber}') -> Question '${matchedQ.id}' ('${matchedQ.number}').`
