@@ -55,16 +55,16 @@ class NodeCanvasFactory {
  */
 async function renderPdfToPageImages(fileBuffer: Buffer): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.js" as any);
+  const pdfWorker = await import("pdfjs-dist/legacy/build/pdf.worker.js" as any);
 
   if (pdfjs.GlobalWorkerOptions) {
-    pdfjs.GlobalWorkerOptions.workerSrc = "";
+    pdfjs.GlobalWorkerOptions.workerPort = pdfWorker;
   }
 
   const uint8Array = new Uint8Array(fileBuffer);
   const loadingTask = pdfjs.getDocument({
     data: uint8Array,
     disableFontFace: true,
-    disableWorker: true,
     verbosity: 0,
   });
 
