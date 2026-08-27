@@ -20,6 +20,7 @@ VedaAI is an AI-powered academic assessment evaluation suite designed to streaml
 | **FR-08** | **Interactive Split-Screen Workspace** | 2-column layout (`md:grid-cols-12`) with question cards on the left and SVG bounding box PDF viewer on the right. | `IMPLEMENTED` |
 | **FR-09** | **Rounded Integer Grade Pill** | Displays overall percentage score as a clean integer badge (e.g. `58% GRADE`). | `IMPLEMENTED` |
 | **FR-10** | **Collapsible Sidebar & Navigation** | Smooth mobile drawer and desktop sidebar width transition (`w-20` collapsed / `w-64` expanded). | `IMPLEMENTED` |
+| **FR-11** | **Vercel Serverless & Storage Sync** | Ephemeral `/tmp` file-backed storage sync with 1-hour TTL pruning and 15-job max capacity cap to guarantee serverless polling. | `IMPLEMENTED` |
 
 ---
 

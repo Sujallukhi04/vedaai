@@ -34,8 +34,8 @@ vedaai/
 │       │   ├── ai.ts                # Groq API vision/text parsing & grading engine
 │       │   ├── grok.ts              # Groq multi-model fallback API client
 │       │   ├── ocr.ts               # OCR.space API handwriting & line coordinate extractor
-│       │   ├── pdf.ts               # PDF-to-image canvas rendering pipeline
-│       │   └── store.ts             # In-memory job state repository
+│       │   ├── pdf.ts               # PDF-to-image canvas rendering & worker polyfill
+│       │   └── store.ts             # Ephemeral /tmp file-backed job repository
 │       └── public/
 │           ├── veda_logo.png        # Official high-res logo asset
 │           ├── favicon.png          # PNG browser tab icon
@@ -49,6 +49,7 @@ vedaai/
 │   ├── TECHNICAL_IMPLEMENTATION.md  # System Architecture & Technical Specifications
 │   ├── REQUIREMENTS.md              # Functional & Non-Functional Specifications
 │   └── TESTING.md                   # Verification & QA Manual Test Guide
+├── vercel.json                      # Monorepo Vercel deployment configuration
 └── package.json                     # pnpm workspace configuration
 ```
 
@@ -94,6 +95,12 @@ vedaai/
   - Responsive SVG overlay rendering pixel-perfect bounding boxes around handwritten answers.
   - Interactive highlights: Clicking a question highlights its corresponding answer bounding box on the PDF canvas.
   - Dark Toolbar Header (`- FIT 100% +` zoom controls and `< Page 1 of 4 >` navigation).
+
+### 3.7 Vercel Serverless Function Execution & Storage Synchronization (`store.ts` & `route.ts`)
+- **Synchronous Execution Guarantee**: Awaits `processJobBackground` inside `POST /api/jobs` within the 60s `maxDuration` limit so Vercel Serverless Function processes are never frozen or killed mid-execution.
+- **`/tmp` Storage Synchronization**: Synchronizes jobs to `/tmp/vedaai_jobs_store.json` so polling requests across stateless Vercel containers locate active jobs instantly.
+- **Automatic Pruning Algorithm**: Purges jobs older than 1 hour and caps maximum stored entries to 15, ensuring storage stays under ~15 MB (leaving 95%+ of Vercel's 512MB `/tmp` disk free).
+- **PDF.js Global Worker Polyfill**: Loads `globalThis.pdfjsWorker = pdfWorker` to eliminate dynamic `./pdf.worker.js` require errors in Next.js App Router Vercel builds.
 
 ---
 

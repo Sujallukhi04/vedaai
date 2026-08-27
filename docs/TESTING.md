@@ -25,6 +25,7 @@ npm run build
 | **TC-03** | **Overall Grade Score Pill Formatting** | 1. Complete an assessment job with 57.5% score.<br>2. Check top overall assessment card badge. | Badge displays clean rounded integer **`58% GRADE`** without font crowding. |
 | **TC-04** | **Active Groq AI Production Models** | 1. Observe dev server terminal logs during processing job. | AI pipeline calls active models (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`) with HTTP 200 responses. |
 | **TC-05** | **Single Source of Truth Type Safety** | 1. Inspect imports across `apps/web/lib/ai.ts` and `apps/web/components/`. | All models (`Question`, `Grade`, `Mapping`) import directly from `@repo/shared`. |
+| **TC-06** | **Vercel Serverless Persistence & Pruning** | 1. Upload assessment on Vercel deployment.<br>2. Inspect `/tmp/vedaai_jobs_store.json` size after processing multiple jobs. | Polling resolves job status cleanly across Vercel instances, and store stays under ~15 MB. |
 
 ---
 
@@ -35,5 +36,6 @@ npm run build
 - [x] Parent question matching maps `"3(a)"` / `"3a"` to Question `"3"`.
 - [x] Groq API calls use active production models (`openai/gpt-oss-120b`).
 - [x] Overall score pill renders rounded integer percentage (`58% GRADE`).
+- [x] Vercel Serverless `/tmp` storage synchronization and automatic pruning active.
 - [x] Mobile drawer & desktop sidebar animate smoothly.
 - [x] Next.js dev server running on `http://localhost:3000`.
