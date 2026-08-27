@@ -57,8 +57,15 @@ async function renderPdfToPageImages(fileBuffer: Buffer): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.js" as any);
   const pdfWorker = await import("pdfjs-dist/legacy/build/pdf.worker.js" as any);
 
+  if (typeof globalThis !== "undefined") {
+    (globalThis as any).pdfjsWorker = pdfWorker;
+  }
   if (pdfjs.GlobalWorkerOptions) {
-    pdfjs.GlobalWorkerOptions.workerPort = pdfWorker;
+    try {
+      pdfjs.GlobalWorkerOptions.workerSrc = require.resolve("pdfjs-dist/legacy/build/pdf.worker.js");
+    } catch (e) {
+      // ignore
+    }
   }
 
   const uint8Array = new Uint8Array(fileBuffer);
