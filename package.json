@@ -2,9 +2,10 @@
   "name": "ai-assessment-monorepo",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter web dev",
+    "dev": "pnpm --filter web dev -p 3000",
     "build": "pnpm --filter @repo/shared build && pnpm --filter web build",
-    "start": "pnpm --filter web start"
+    "start": "pnpm --filter web start",
+    "lint": "pnpm --filter web lint"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
