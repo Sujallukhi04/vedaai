@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { JobResult, CreateJobInput } from "@repo/shared";
 import { extractQuestions, extractAnswerSegments, mapAnswersToQuestions, gradeAnswers } from "@/lib/ai";
 import { renderPDFToDataUrls } from "@/lib/pdf";
-import { setJob, updateJob, store } from "@/lib/store";
+import { setJob, updateJob, getJob, store } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -77,15 +77,11 @@ export async function POST(req: NextRequest) {
 
     setJob(jobId, newJob);
 
-    // Trigger async background processing loop
-    processJobBackground(jobId, questionPaperInput, answerSheetInput, enableGrading).catch(
-      (err) => {
-        console.error(`[Job ${jobId}] Async pipeline failed:`, err);
-        updateJob(jobId, { status: "error", error: err.message || "Pipeline failed" });
-      }
-    );
+    // Await processing directly so Vercel Serverless Function is never killed/frozen mid-execution
+    await processJobBackground(jobId, questionPaperInput, answerSheetInput, enableGrading);
 
-    return NextResponse.json({ jobId, status: "uploading" }, { status: 200 });
+    const finalJob = getJob(jobId);
+    return NextResponse.json({ jobId, status: finalJob?.status || "done" }, { status: 200 });
   } catch (err: any) {
     console.error("[POST /api/jobs] Error starting job:", err);
     return NextResponse.json(
@@ -144,7 +140,7 @@ async function processJobBackground(
       status: "extracting_answers",
     });
 
-    // Step 3: Extract Student Answer Segments via 100% Groq System (passing questions for multi-answer detection)
+    // Step 3: Extract Student Answer Segments via 100% Groq System
     console.log(`[Job ${jobId}] Extracting student answer segments via 100% Groq System...`);
     const answerSegments = await extractAnswerSegments(answerSheetPages, questions);
 
