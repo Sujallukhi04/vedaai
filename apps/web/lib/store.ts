@@ -15,6 +15,29 @@ function getStoreFilePath(): string {
   }
 }
 
+function pruneOldJobs(jobsMap: Map<string, JobResult>): Map<string, JobResult> {
+  const MAX_JOBS = 15;
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const now = Date.now();
+
+  const entries = Array.from(jobsMap.entries());
+  let validEntries = entries.filter(([_, job]) => {
+    const created = new Date(job.createdAt || now).getTime();
+    return now - created < ONE_HOUR_MS;
+  });
+
+  if (validEntries.length > MAX_JOBS) {
+    validEntries.sort((a, b) => {
+      const tA = new Date(a[1].createdAt || 0).getTime();
+      const tB = new Date(b[1].createdAt || 0).getTime();
+      return tB - tA;
+    });
+    validEntries = validEntries.slice(0, MAX_JOBS);
+  }
+
+  return new Map<string, JobResult>(validEntries);
+}
+
 function loadJobsFromFile(): Record<string, JobResult> {
   try {
     const filePath = getStoreFilePath();
@@ -30,9 +53,15 @@ function loadJobsFromFile(): Record<string, JobResult> {
 
 function saveJobsToFile(jobsMap: Map<string, JobResult>): void {
   try {
+    const prunedMap = pruneOldJobs(jobsMap);
+    
+    // Sync memory store with pruned entries to free RAM
+    store.clear();
+    prunedMap.forEach((v, k) => store.set(k, v));
+
     const filePath = getStoreFilePath();
     const obj: Record<string, JobResult> = {};
-    jobsMap.forEach((v, k) => {
+    prunedMap.forEach((v, k) => {
       obj[k] = v;
     });
     fs.writeFileSync(filePath, JSON.stringify(obj), "utf8");
