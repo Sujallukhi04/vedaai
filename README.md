@@ -1,6 +1,6 @@
 # 🎓 VedaAI — AI Academic Assessment Suite
 
-VedaAI is a full-stack monorepo application built with Next.js 14 App Router, Tailwind CSS, TypeScript, and the 100% Groq AI Engine (`openai/gpt-oss-120b`). It automates exam question extraction, student handwriting segmentation, question-answer mapping with 1–10 confidence scoring, and automated teacher evaluation.
+VedaAI is a full-stack monorepo application built with Next.js 14 App Router, Tailwind CSS, TypeScript, and the 100% Groq AI Engine (`llama-3.3-70b-versatile`). It automates exam question extraction, student handwriting segmentation, question-answer mapping with 1–10 confidence scoring, and automated teacher evaluation.
 
 ---
 
@@ -15,25 +15,61 @@ VedaAI is a full-stack monorepo application built with Next.js 14 App Router, Ta
 
 ---
 
+## 🚀 Quick Start for Anyone Cloning the Repository
+
+Follow these 3 simple steps to set up and run VedaAI locally:
+
+### Step 1: Clone Repository & Install Monorepo Dependencies
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+cd vedaai
+
+# Single command installs all packages across apps/web and packages/shared
+pnpm install
+```
+
+### Step 2: Configure Environment Variables
+Copy `.env.example` to `.env.local` inside `apps/web`:
+```bash
+cp apps/web/.env.example apps/web/.env.local
+```
+Add your free Groq API key inside `apps/web/.env.local`:
+```env
+GROQ_API_KEY=gsk_your_groq_api_key_here
+```
+
+### Step 3: Run Development Server
+```bash
+pnpm dev
+```
+Open **`http://localhost:3000`** in your browser!
+
+---
+
+## 🛠️ Root Monorepo Commands
+
+| Command | Action |
+| :--- | :--- |
+| **`pnpm install`** | Installs dependencies across all packages and links `@repo/shared` automatically. |
+| **`pnpm dev`** | Runs Next.js development server on port 3000 (`http://localhost:3000`). |
+| **`pnpm build`** | Runs type checks on `@repo/shared` and builds `apps/web` with 0 build errors. |
+| **`pnpm start`** | Runs Next.js production server. |
+| **`pnpm lint`** | Runs Next.js linter. |
+
+---
+
+## ☁️ Deploying to Vercel (100% Free)
+
+1. Push code to your GitHub repository (`git push -u origin main`).
+2. Import project in **Vercel** ➔ Set Root Directory: `apps/web`.
+3. Framework Preset: **Next.js**.
+4. Add Environment Variable: `GROQ_API_KEY` = *your Groq key*.
+5. Click **Deploy**! 🚀
+
+---
+
 ## 📁 Documentation Suite
 
 - 📖 [`docs/TECHNICAL_IMPLEMENTATION.md`](file:///e:/vedaai/docs/TECHNICAL_IMPLEMENTATION.md) — System Architecture & Technical Specifications
 - 📋 [`docs/REQUIREMENTS.md`](file:///e:/vedaai/docs/REQUIREMENTS.md) — Functional & Non-Functional Specifications
 - 🧪 [`docs/TESTING.md`](file:///e:/vedaai/docs/TESTING.md) — QA Verification & Manual Test Suite
-
----
-
-## 🚀 Quick Start
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start Next.js development server
-pnpm --filter web dev -p 3000
-
-# Build production bundle
-pnpm --filter web build
-```
-
-Open [http://localhost:3000](http://localhost:3000) to launch VedaAI!
