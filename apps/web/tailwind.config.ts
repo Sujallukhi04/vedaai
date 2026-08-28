@@ -9,9 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-claude-sans)", "Plus Jakarta Sans", "Inter", "sans-serif"],
-        serif: ["var(--font-claude-serif)", "Lora", "Georgia", "serif"],
-        heading: ["var(--font-claude-heading)", "Outfit", "sans-serif"],
+        sans: ["var(--font-bricolage)", "Bricolage Grotesque", "sans-serif"],
+        heading: ["var(--font-bricolage)", "Bricolage Grotesque", "sans-serif"],
+      },
+      fontSize: {
+        "heading-lg": ["40px", { lineHeight: "1.2", letterSpacing: "-0.04em", fontWeight: "700" }],
+        "heading-md": ["32px", { lineHeight: "1.2", letterSpacing: "-0.03em", fontWeight: "700" }],
+        "heading-sm": ["24px", { lineHeight: "1.3", letterSpacing: "-0.02em", fontWeight: "700" }],
       },
       colors: {
         brand: {

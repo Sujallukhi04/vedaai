@@ -1,26 +1,12 @@
 import "./globals.css";
 import React from "react";
-import { Plus_Jakarta_Sans, Outfit, Lora } from "next/font/google";
+import { Bricolage_Grotesque } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-claude-sans",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800", "900"],
-  variable: "--font-claude-heading",
-  display: "swap",
-});
-
-const lora = Lora({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-claude-serif",
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -46,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} ${outfit.variable} ${lora.variable}`}
+      className={`${bricolage.variable}`}
     >
       <body className="font-sans antialiased bg-[#f1f3f6] text-slate-900 min-h-screen">
         <AppShell>{children}</AppShell>
