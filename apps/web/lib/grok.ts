@@ -61,9 +61,15 @@ export async function gradeAnswersWithGroq(
   answerSegments: AnswerSegment[],
   mappings: Mapping[]
 ): Promise<{ grades: Grade[]; summary: GradeSummary }> {
-  const systemPrompt = `You are an expert academic evaluator and teacher assistant.
-Grade student handwritten answers against extracted exam questions.
-Output JSON only in this exact format:
+  const systemPrompt = `You are an expert strict academic evaluator.
+Grade each student response against the question and provide concise, constructive feedback.
+
+SCORING CRITERIA:
+- Assign a score out of maxScore (e.g. 0 to 5 or 0 to 10).
+- "verdict": "correct" (full marks), "partially_correct" (partial marks), or "incorrect" (0 marks).
+- "feedback": 1-2 sentence concise explanation.
+
+Respond strictly in JSON format:
 {
   "grades": [
     {
@@ -71,7 +77,7 @@ Output JSON only in this exact format:
       "score": number,
       "maxScore": number,
       "verdict": "correct" | "partially_correct" | "incorrect",
-      "feedback": "string brief summary of student correctness"
+      "feedback": "string"
     }
   ],
   "summary": {

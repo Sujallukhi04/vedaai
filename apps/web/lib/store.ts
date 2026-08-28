@@ -17,13 +17,13 @@ function getStoreFilePath(): string {
 
 function pruneOldJobs(jobsMap: Map<string, JobResult>): Map<string, JobResult> {
   const MAX_JOBS = 15;
-  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const TEN_MINUTES_MS = 10 * 60 * 1000; // 10 Minutes TTL
   const now = Date.now();
 
   const entries = Array.from(jobsMap.entries());
   let validEntries = entries.filter(([_, job]) => {
     const created = new Date(job.createdAt || now).getTime();
-    return now - created < ONE_HOUR_MS;
+    return now - created < TEN_MINUTES_MS;
   });
 
   if (validEntries.length > MAX_JOBS) {

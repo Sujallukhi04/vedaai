@@ -294,6 +294,11 @@ Respond strictly using ONLY valid JSON:
     const answers =
       (Array.isArray(rawResp) ? rawResp : rawResp?.answers || rawResp?.answerSegments || rawResp?.segments || []);
 
+    if (answers.length <= 1 && ocrPages.some((p) => p.lines.length >= 3)) {
+      console.log("[AI Line Clustering Engine] Single block returned by LLM. Using Header-to-Header OCR segmentation to isolate individual answers...");
+      return processOCRIntoAnswerSegments(ocrPages);
+    }
+
     const segments: AnswerSegment[] = [];
     const usedLineIndices = new Set<number>();
 

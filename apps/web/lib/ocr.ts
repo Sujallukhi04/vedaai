@@ -231,7 +231,8 @@ export function processOCRIntoAnswerSegments(
   ocrResults: OCRPageResult[]
 ): AnswerSegment[] {
   const segments: AnswerSegment[] = [];
-  const headerRegex = /^(?:Q|q|Question|Ans|Answer)?[\.\s]*([0-9]+(?:\([a-z0-9]+\))?|\([a-z0-9]+\))(?:\.|\:|\-|\)|\s+|$)/i;
+  // Regex matching Q1., 1., Q1, Ans 1, Q3(a), 3(a), 3a, 1), Q-1, etc.
+  const headerRegex = /^(?:Q|q|Question|Ans|Answer|Sol|Solution)?[\.\s\:\-]*([0-9]+(?:\s*[\(\.][a-z0-9]+[\)]?)?|\([a-z0-9]+\))(?:\.|\:|\-|\)|\s+|$)/i;
 
   for (const ocrPage of ocrResults) {
     const pIdx = ocrPage.pageIndex;
@@ -248,10 +249,12 @@ export function processOCRIntoAnswerSegments(
       // Skip top margin header noise
       if (l.box.y < 0.06 && /^(?:date|page|no)/i.test(l.text)) return;
 
-      const match = l.text.match(headerRegex);
+      const trimmedText = l.text.trim();
+      const match = trimmedText.match(headerRegex);
       if (match) {
-        // Exclude units like 1NF, 100kg
-        if (!l.text.match(/^[0-9]+[a-zA-Z]{2,}/)) {
+        const numCandidate = match[1].replace(/[\s\.\(\)]/g, "");
+        // Exclude units or common non-question words like 1NF, 100%, 1st
+        if (!trimmedText.match(/^[0-9]+(?:\s*)(?:nf|st|nd|rd|th|kg|g|cm|m|%|px|mb|gb)\b/i)) {
           lineHeaders.push({ lineIndex: idx, num: match[1].trim() });
         }
       }

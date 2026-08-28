@@ -23,19 +23,19 @@ vedaai/
 │       │   ├── api/jobs/            # Job creation & polling API routes
 │       │   ├── process/[id]/        # Real-time processing progress screen
 │       │   ├── results/[id]/        # Teacher split-screen assessment dashboard
-│       │   ├── globals.css          # Tailwind CSS & Typography system
-│       │   ├── layout.tsx           # Google Fonts (Plus Jakarta Sans, Outfit) & Metadata icons
+│       │   ├── globals.css          # Tailwind CSS & Typography system (Bricolage Grotesque)
+│       │   ├── layout.tsx           # Google Fonts & Metadata icons
 │       │   └── page.tsx             # Landing upload dashboard
 │       ├── components/
-│       │   ├── AppShell.tsx         # Responsive navbar & smooth collapsible sidebar (w-20 / w-64)
-│       │   ├── ProcessingProgress.tsx # Minimal 5-step AI pipeline progress checklist card
+│       │   ├── AppShell.tsx         # Responsive navbar & smooth collapsible sidebar
+│       │   ├── ProcessingProgress.tsx # Gemini AI 4-sparkle cluster loading animation screen
 │       │   └── TeacherSplitScreenFigma.tsx # Dual 2-column questions & SVG canvas viewer
 │       ├── lib/
 │       │   ├── ai.ts                # Groq API vision/text parsing & grading engine
 │       │   ├── grok.ts              # Groq multi-model fallback API client
 │       │   ├── ocr.ts               # OCR.space API handwriting & line coordinate extractor
 │       │   ├── pdf.ts               # PDF-to-image canvas rendering & worker polyfill
-│       │   └── store.ts             # Ephemeral /tmp file-backed job repository
+│       │   └── store.ts             # Ephemeral /tmp file-backed job repository (10-minute TTL)
 │       └── public/
 │           ├── veda_logo.png        # Official high-res logo asset
 │           ├── favicon.png          # PNG browser tab icon
@@ -43,8 +43,8 @@ vedaai/
 ├── packages/
 │   └── shared/                      # Single Source of Truth Shared Package (@repo/shared)
 │       ├── index.ts
-│       ├── normalize.ts             # Flexible Question Number Normalizer ("A 1", "Ans 1", "Sol 1" -> "1")
-│       └── types.ts                 # Single Source of Truth for Question, AnswerSegment, Grade, JobResult
+│       ├── normalize.ts             # Question Number Normalizer ("A 1", "Ans 1", "Sol 1" -> "1")
+│       └── types.ts                 # Types for Question, AnswerSegment, Grade, JobResult
 ├── docs/
 │   ├── TECHNICAL_IMPLEMENTATION.md  # System Architecture & Technical Specifications
 │   ├── REQUIREMENTS.md              # Functional & Non-Functional Specifications
@@ -57,55 +57,58 @@ vedaai/
 
 ## 3. Core Technical Subsystems
 
-### 3.1 Flexible Question Number Normalization & Parent Prefix Matching (`packages/shared/normalize.ts`)
+### 3.1 Question & Answer Number Normalization (`packages/shared/normalize.ts`)
 - Cleans and standardizes printed and handwritten question labels:
   - **`"A 1"` / `"A. 1"` / `"A-1"`** ➔ Normalized to **`"1"`**
   - **`"Ans 1"` / `"Ans. 1"` / `"Answer 1"`** ➔ Normalized to **`"1"`**
   - **`"Ans. 1(a)"` / `"A 1(a)"`** ➔ Normalized to **`"1a"`**
   - **`"Sol 3"` / `"Solution 3"`** ➔ Normalized to **`"3"`**
   - **`"Q. 4"` / `"Question 4"`** ➔ Normalized to **`"4"`**
-- **Parent Question Prefix Resolution**: If a student labels their answer as `3(a)`, `3.a`, or `3a`, and the exam paper lists question `3`, the system extracts parent prefix `3` (`extractParentQuestionNumber("3a")` ➔ `"3"`), mapping `3(a)` directly to Question `3`!
+- **Parent Question Prefix Resolution**: Extracts parent prefix `3` for sub-questions like `3(a)`, `3.a`, or `3a` (`extractParentQuestionNumber("3a")` ➔ `"3"`).
 
 ### 3.2 Dynamic OCR Line Extraction Engine (`apps/web/lib/ocr.ts`)
 - Primary scanning powered by OCR.space Handwriting API engine.
 - Extracts line-by-line bounding coordinates `[x, y, w, h]` normalized between `0.0` and `1.0`.
 - Exponential backoff retry logic (up to 3 retries) handles API rate limits.
+- Header-to-header segmentation regex identifies question boundaries (`Q1.`, `1.`, `Ans 1`, `3(a)`, `3a`) for clean line clustering.
 
-### 3.3 Active 100% Groq AI Models (`apps/web/lib/ai.ts` & `apps/web/lib/grok.ts`)
-- Uses active high-performance production models on Groq API:
-  1. **`openai/gpt-oss-120b`**: Primary high-intelligence model for question parsing, line clustering & grading.
-  2. **`openai/gpt-oss-20b`**: Fast lightweight fallback model.
-  3. **`qwen/qwen3.8-27b`**: High-accuracy instruction backup model.
-- Automatically retries across fallback models if any single model hits a temporary limit.
+### 3.3 Production Groq AI Model Pipeline (`apps/web/lib/ai.ts` & `apps/web/lib/grok.ts`)
+- Active production models on Groq API:
+  1. **`openai/gpt-oss-120b`**: High-intelligence model for question extraction & grading.
+  2. **`openai/gpt-oss-20b`**: Fast backup model.
+  3. **`qwen/qwen3.8-27b`**: Instruction backup model.
+- Automatically retries across fallback models if any single model hits a rate limit.
 
-### 3.4 1–10 Mapping Confidence Score Calculator
-- Computes mapping certainty based on detection signals:
-  - **10/10 Confidence**: Direct printed question label match (e.g., segment `A 1` or `Ans 3(a)` matched to Question `1` or `3`).
-  - **8/10 Confidence**: Semantic text/topic match without explicit label.
-  - **5/10 Confidence**: Ambiguous or multi-candidate match requiring teacher review.
+### 3.4 Gemini AI Sparkle Cluster Loading Screen (`ProcessingProgress.tsx`)
+- Vector geometry matching Google Gemini sparkle symbol (4-element cluster: Large Top-Right, Medium Bottom-Left, Small Bottom-Right, Accent Dot).
+- Fluid scaling across desktop (`177px × 177px`) and mobile (`130px × 130px`) viewports.
+- Blends with app background (`bg-transparent`).
 
-### 3.5 Minimal Step-by-Step Processing Screen (`ProcessingProgress.tsx`)
-- Displays a clean 5-step pipeline checklist card with active loading spinners (`Loader2 animate-spin`), green checkmarks (`CheckCircle2`), and step index badges.
-- Dynamically omits the 5th AI Grading step when `enableGrading: false`.
+### 3.5 Teacher Split-Screen Dashboard (`TeacherSplitScreenFigma.tsx`)
+- **Extracted Questions Panel**:
+  - Wrapped inside a sleek outer card container (`bg-slate-50/60 sm:bg-white/80 border border-slate-200/90 rounded-[28px] p-3.5 sm:p-5 shadow-xs`).
+  - Active Question: Orange border (`border-2 border-[#f0562e]`) and orange circle badge (`bg-[#f0562e] text-white`).
+  - Inactive Question: Clean border (`border border-slate-100`) and dark circle badge (`bg-[#383b3e] text-white`).
+  - Score Pills: Green (`bg-[#e6f7ed] text-[#16a34a]`) for full score, Coral (`bg-[#fff2e8] text-[#f0562e]`) for partial.
+- **Answer Sheet Viewer**:
+  - SVG Bounding Box Overlays: Highlighted in **Green** (`rgba(34, 197, 94, 0.22)` / `#16a34a`) when selecting a question card, and **Purple** (`rgba(168, 85, 247, 0.22)` / `#a855f7`) when selecting an unmatched answer.
+  - PDF view remains clean when no item is selected.
+  - Large Navigation Buttons: Lucide `ChevronLeft` and `ChevronRight` icons (`w-5 h-5 stroke-[2.5]`).
 
-### 3.6 Interactive Dual-Viewport Split Screen (`TeacherSplitScreenFigma.tsx`)
-- **Header Badge**: Rounded integer overall grade score pill (e.g., **`58% GRADE`**).
-- **Left Column**: Accordion list of questions with score pills, AI evaluation feedback, and transcribed answer text.
-- **Right Column**: Interactive Answer Sheet Viewer featuring:
-  - Responsive SVG overlay rendering pixel-perfect bounding boxes around handwritten answers.
-  - Interactive highlights: Clicking a question highlights its corresponding answer bounding box on the PDF canvas.
-  - Dark Toolbar Header (`- FIT 100% +` zoom controls and `< Page 1 of 4 >` navigation).
+### 3.6 Mobile Viewport Optimization
+- Mobile Tab Switcher: Short clean tab labels **`Questions`** | **`Answer Sheet`**.
+- Mobile Question Cards: Number badge and score pill sit on the top row, with question text wrapping below for maximum readability.
+- Compact PDF Header Bar: Zoom (`- 100% +`) and Page controls scale cleanly on 375px screens.
 
-### 3.7 Vercel Serverless Function Execution & Storage Synchronization (`store.ts` & `route.ts`)
-- **Synchronous Execution Guarantee**: Awaits `processJobBackground` inside `POST /api/jobs` within the 60s `maxDuration` limit so Vercel Serverless Function processes are never frozen or killed mid-execution.
-- **`/tmp` Storage Synchronization**: Synchronizes jobs to `/tmp/vedaai_jobs_store.json` so polling requests across stateless Vercel containers locate active jobs instantly.
-- **Automatic Pruning Algorithm**: Purges jobs older than 1 hour and caps maximum stored entries to 15, ensuring storage stays under ~15 MB (leaving 95%+ of Vercel's 512MB `/tmp` disk free).
-- **PDF.js Global Worker Polyfill**: Loads `globalThis.pdfjsWorker = pdfWorker` to eliminate dynamic `./pdf.worker.js` require errors in Next.js App Router Vercel builds.
+### 3.7 Ephemeral Storage with 10-Minute TTL (`store.ts`)
+- **10-Minute TTL Expiration**: Jobs in `/tmp/vedaai_jobs_store.json` and memory store automatically expire after 10 minutes (`TEN_MINUTES_MS = 10 * 60 * 1000`).
+- **Cap Limit**: Maximum 15 entries stored, keeping disk footprint under 15 MB.
+- **Serverless Synchronization**: Awaits synchronous job execution inside `POST /api/jobs` for Vercel deployment.
 
 ---
 
-## 4. Key Performance Optimizations
+## 4. Key Verification Standards
 
-1. **Single Source of Truth**: All data models and interfaces are exported strictly from `@repo/shared` (`packages/shared/types.ts`).
-2. **Monorepo Build Integrity**: Zero build warnings or errors across Next.js App Router (`npm run build` passes cleanly).
-3. **Fluid Responsive UI**: Custom Tailwind grid breakpoints (`md:grid-cols-12`) ensure side-by-side split screen on desktop viewports and tabbed view on mobile.
+1. **Monorepo Build Integrity**: `pnpm --filter web build` compiles 100% clean with **0 errors**.
+2. **Single Source of Truth**: Data contracts exported strictly from `@repo/shared`.
+3. **SEO & Accessibility**: Semantic HTML5 headers, descriptive metadata, fluid responsive design.

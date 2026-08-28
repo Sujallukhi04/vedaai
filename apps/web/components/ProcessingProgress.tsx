@@ -3,54 +3,161 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { JobResult } from "@repo/shared";
-import {
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  ArrowLeft,
-  Sparkles,
-  Cpu,
-  Layers,
-  FileSearch,
-  Award
-} from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 
 interface ProcessingProgressProps {
   jobId: string;
 }
 
-const STEPS: { key: JobResult["status"]; label: string; description: string; icon: any }[] = [
-  {
-    key: "uploading",
-    label: "Rendering High-Res Pages",
-    description: "Converting PDF pages into crisp high-definition image frames",
-    icon: Layers,
-  },
-  {
-    key: "extracting_questions",
-    label: "Extracting Exam Questions",
-    description: "Detecting question labels, marks & structured text via Groq AI",
-    icon: FileSearch,
-  },
-  {
-    key: "extracting_answers",
-    label: "Transcribing Student Handwriting",
-    description: "Scanning handwritten answers & mapping pixel coordinates",
-    icon: Cpu,
-  },
-  {
-    key: "mapping",
-    label: "Mapping Answers to Questions",
-    description: "Matching student responses & tagging rough calculations",
-    icon: Sparkles,
-  },
-  {
-    key: "grading",
-    label: "AI Evaluation & Auto-Grading",
-    description: "Computing detailed criteria feedback & overall test scores",
-    icon: Award,
-  },
-];
+/* 
+  Official Google Gemini AI Icon Sparkle Component
+  - Deep Concave Bezier Curved 4-Point Gemini Stars
+  - Blends seamlessly with current background (no white box)
+  - Staggered CSS Scaling & Coral/Orange Radial Glow
+*/
+function GeminiSparkleStars() {
+  return (
+    <div
+      className="relative w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] flex items-center justify-center mx-auto mb-4 select-none"
+      aria-hidden="true"
+    >
+      {/* Soft Ambient Radial Glow - Blends with background */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-orange-400/20 via-orange-500/10 to-transparent rounded-full blur-2xl animate-pulse" />
+
+      <style jsx>{`
+        @keyframes geminiPulseLarge {
+          0%,
+          100% {
+            transform: scale(0.82);
+            opacity: 0.7;
+            filter: drop-shadow(0 0 8px rgba(240, 86, 46, 0.4));
+          }
+          50% {
+            transform: scale(1.06);
+            opacity: 1;
+            filter: drop-shadow(0 0 20px rgba(240, 86, 46, 0.85));
+          }
+        }
+
+        @keyframes geminiPulseMedium {
+          0%,
+          100% {
+            transform: scale(0.78);
+            opacity: 0.7;
+            filter: drop-shadow(0 0 6px rgba(240, 86, 46, 0.3));
+          }
+          50% {
+            transform: scale(1.05);
+            opacity: 1;
+            filter: drop-shadow(0 0 16px rgba(240, 86, 46, 0.8));
+          }
+        }
+
+        @keyframes geminiPulseSmall {
+          0%,
+          100% {
+            transform: scale(0.75);
+            opacity: 0.7;
+          }
+          50% {
+            transform: scale(1.05);
+            opacity: 1;
+            filter: drop-shadow(0 0 12px rgba(240, 86, 46, 0.75));
+          }
+        }
+
+        .star-top-large {
+          animation: geminiPulseLarge 2.4s ease-in-out infinite;
+          animation-delay: 0s;
+          transform-origin: 105px 55px;
+        }
+
+        .star-bottom-left {
+          animation: geminiPulseMedium 2.4s ease-in-out infinite;
+          animation-delay: 0.8s;
+          transform-origin: 75px 105px;
+        }
+
+        .star-bottom-right {
+          animation: geminiPulseSmall 2.4s ease-in-out infinite;
+          animation-delay: 1.6s;
+          transform-origin: 132px 110px;
+        }
+
+        .star-dot-accent {
+          animation: geminiPulseSmall 2.4s ease-in-out infinite;
+          animation-delay: 0.3s;
+          transform-origin: 55px 52px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .star-top-large,
+          .star-bottom-left,
+          .star-bottom-right,
+          .star-dot-accent {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: scale(1) !important;
+          }
+        }
+      `}</style>
+
+      <svg
+        width="177"
+        height="177"
+        viewBox="0 0 177 177"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full relative z-10 overflow-visible"
+      >
+        <defs>
+          {/* Coral to Orange Rich Gradient */}
+          <linearGradient
+            id="geminiCoralGrad"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#ff7e40" />
+            <stop offset="50%" stopColor="#f0562e" />
+            <stop offset="100%" stopColor="#d94822" />
+          </linearGradient>
+        </defs>
+
+        {/* Small Coral Dot Accent - Top Left */}
+        <circle
+          cx="55"
+          cy="52"
+          r="7.5"
+          fill="url(#geminiCoralGrad)"
+          className="star-dot-accent"
+        />
+
+        {/* 1. LARGEST FIGMA GEMINI STAR - Top Right */}
+        <path
+          d="M 105 13 C 105 38 122 55 147 55 C 122 55 105 72 105 97 C 105 72 88 55 63 55 C 88 55 105 38 105 13 Z"
+          fill="url(#geminiCoralGrad)"
+          className="star-top-large"
+        />
+
+        {/* 2. MEDIUM FIGMA GEMINI STAR - Bottom Left */}
+        <path
+          d="M 75 77 C 75 94 86 105 103 105 C 86 105 75 116 75 133 C 75 116 64 105 47 105 C 64 105 75 94 75 77 Z"
+          fill="url(#geminiCoralGrad)"
+          className="star-bottom-left"
+        />
+
+        {/* 3. SMALL FIGMA GEMINI STAR - Bottom Right */}
+        <path
+          d="M 132 94 C 132 104 138 110 148 110 C 138 110 132 116 132 126 C 132 116 126 110 116 110 C 126 110 132 104 132 94 Z"
+          fill="url(#geminiCoralGrad)"
+          className="star-bottom-right"
+        />
+      </svg>
+    </div>
+  );
+}
 
 export function ProcessingProgress({ jobId }: ProcessingProgressProps) {
   const router = useRouter();
@@ -75,7 +182,7 @@ export function ProcessingProgress({ jobId }: ProcessingProgressProps) {
         if (data.status === "done") {
           setTimeout(() => {
             router.push(`/results/${jobId}`);
-          }, 500);
+          }, 400);
         }
       } catch (err: any) {
         if (isMounted) {
@@ -104,16 +211,8 @@ export function ProcessingProgress({ jobId }: ProcessingProgressProps) {
   const isError = currentStatus === "error" || Boolean(fetchError);
   const errorMessage = job?.error || fetchError;
 
-  // Dynamically omit the AI Grading step if auto-grading is disabled by the user
-  const isGradingDisabled = job?.enableGrading === false;
-  const activeSteps = isGradingDisabled
-    ? STEPS.filter((s) => s.key !== "grading")
-    : STEPS;
-
-  const currentStepIndex = Math.max(0, activeSteps.findIndex((s) => s.key === currentStatus));
-
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-3 py-6 sm:py-10 max-w-md mx-auto">
+    <div className="min-h-[55vh] sm:min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-6 sm:py-8 max-w-lg mx-auto bg-transparent">
       {isError ? (
         <div className="w-full bg-rose-50/90 border border-rose-200 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-md">
           <div className="w-14 h-14 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto shadow-xs">
@@ -129,111 +228,32 @@ export function ProcessingProgress({ jobId }: ProcessingProgressProps) {
           </div>
           <button
             onClick={() => router.push("/")}
-            className="inline-flex items-center space-x-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-bold transition-all shadow-xs"
+            className="inline-flex items-center space-x-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Return to Upload</span>
           </button>
         </div>
       ) : (
-        /* Clean Step-by-Step Processing Card */
-        <div className="w-full space-y-4">
-          {/* Header Title */}
-          <div className="space-y-1 text-center">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-heading flex items-center justify-center space-x-2">
-              <span>Extracting...</span>
-              <Loader2 className="w-4.5 h-4.5 text-orange-500 animate-spin" />
-            </h2>
-            <p className="text-xs font-medium text-slate-500">
+        /* Seamless Transparent Centered Gemini AI Loading Screen */
+        <main
+          className="flex flex-col items-center justify-center space-y-2.5 sm:space-y-4 my-auto"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          {/* Gemini Icon Coral Sparkle Stars */}
+          <GeminiSparkleStars />
+
+          {/* Heading & Subtitle */}
+          <header className="space-y-1 sm:space-y-1.5 text-center">
+            <h1 className="text-2xl sm:text-4xl md:text-[40px] font-bold text-[#1e293b] tracking-tight font-heading leading-tight">
+              Extracting...
+            </h1>
+            <p className="text-sm sm:text-lg md:text-[22px] font-normal text-[#64748b] tracking-normal font-sans">
               This may take a while
             </p>
-          </div>
-
-          {/* Clean Step Checklist Box */}
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-3.5 sm:p-4 shadow-sm space-y-2.5 text-left">
-            <div className="flex items-center justify-between px-1 pb-1 border-b border-slate-100">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                Pipeline Progress
-              </span>
-              <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200/60">
-                Step {Math.min(currentStepIndex + 1, activeSteps.length)} of {activeSteps.length}
-              </span>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              {activeSteps.map((step, idx) => {
-                const isFinished = currentStepIndex > idx || currentStatus === "done";
-                const isActive = currentStepIndex === idx && currentStatus !== "done";
-                const StepIcon = step.icon;
-
-                return (
-                  <div
-                    key={step.key}
-                    className={`flex items-start space-x-3 p-3 rounded-2xl border transition-all ${
-                      isActive
-                        ? "bg-orange-50/80 border-orange-300/80 shadow-2xs"
-                        : isFinished
-                        ? "bg-slate-50/80 border-slate-200/60 opacity-95"
-                        : "bg-slate-50/30 border-transparent opacity-40"
-                    }`}
-                  >
-                    {/* Status Indicator Icon */}
-                    <div className="shrink-0 pt-0.5">
-                      {isFinished ? (
-                        <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                        </div>
-                      ) : isActive ? (
-                        <div className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-xs">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-bold">
-                          {idx + 1}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Step Title & Subtitle */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center space-x-1.5">
-                        <StepIcon
-                          className={`w-3.5 h-3.5 ${
-                            isActive
-                              ? "text-orange-600"
-                              : isFinished
-                              ? "text-emerald-600"
-                              : "text-slate-400"
-                          }`}
-                        />
-                        <p
-                          className={`text-xs font-bold ${
-                            isActive
-                              ? "text-orange-950"
-                              : isFinished
-                              ? "text-slate-800"
-                              : "text-slate-500"
-                          }`}
-                        >
-                          {step.label}
-                        </p>
-                      </div>
-                      <p
-                        className={`text-[10px] mt-0.5 leading-tight ${
-                          isActive
-                            ? "text-orange-800/90 font-medium"
-                            : "text-slate-400"
-                        }`}
-                      >
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+          </header>
+        </main>
       )}
     </div>
   );
