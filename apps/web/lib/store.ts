@@ -70,6 +70,24 @@ function saveJobsToFile(jobsMap: Map<string, JobResult>): void {
   }
 }
 
+export function purgeExpiredJobs(): number {
+  try {
+    const fileJobs = loadJobsFromFile();
+    Object.entries(fileJobs).forEach(([id, job]) => {
+      if (!store.has(id)) {
+        store.set(id, job);
+      }
+    });
+
+    const initialCount = store.size;
+    saveJobsToFile(store);
+    const finalCount = store.size;
+    return Math.max(initialCount - finalCount, 0);
+  } catch (e) {
+    return 0;
+  }
+}
+
 export function getJob(jobId: string): JobResult | undefined {
   let job = store.get(jobId);
   if (!job) {

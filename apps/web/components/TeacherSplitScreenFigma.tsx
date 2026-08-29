@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { JobResult, AnswerSegment } from "@repo/shared";
 import {
   ChevronDown,
@@ -29,6 +29,52 @@ export function TeacherSplitScreenFigma({ job }: TeacherSplitScreenFigmaProps) {
   );
   const [expandAll, setExpandAll] = useState<boolean>(false);
   const [mobileTab, setMobileTab] = useState<"questions" | "canvas">("questions");
+
+  // Ref to actual rendered <img> element for pixel-perfect bounding box alignment
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  // Calculate actual rendered image dimensions from getBoundingClientRect()
+  const updateImgDimensions = useCallback(() => {
+    if (imgRef.current) {
+      const rect = imgRef.current.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setImgDimensions({
+          width: rect.width,
+          height: rect.height,
+        });
+      }
+    }
+  }, []);
+
+  // Listen to window resize, ResizeObserver on <img>, zoom level, page index, selected question & tab changes
+  useEffect(() => {
+    updateImgDimensions();
+
+    const handleResize = () => {
+      updateImgDimensions();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    let observer: ResizeObserver | null = null;
+    if (imgRef.current && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        updateImgDimensions();
+      });
+      observer.observe(imgRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [updateImgDimensions, zoomLevel, activePageIdx, selectedQuestionId, mobileTab]);
 
   // Currently selected question & mapping
   const selectedQuestion = job.questions.find((q) => q.id === selectedQuestionId) || null;
@@ -362,22 +408,32 @@ export function TeacherSplitScreenFigma({ job }: TeacherSplitScreenFigmaProps) {
             </div>
           </div>
 
-          {/* Answer Sheet Viewport with GREEN (Matched) & PURPLE (Unmatched) Highlights */}
-          <div className="bg-[#1e2022] p-2.5 sm:p-4 flex justify-center min-h-[500px] overflow-auto rounded-3xl border border-slate-800 shadow-md">
+          {/* Answer Sheet Viewport with Dynamic ResizeObserver Bounding Box Overlay */}
+          <div className="bg-[#1e2022] p-2.5 sm:p-4 flex justify-center items-start overflow-auto rounded-3xl border border-slate-800 shadow-md h-auto max-h-[calc(100vh-200px)]">
             <div
               className="relative transition-all duration-200 max-w-full"
               style={{ width: `${zoomLevel}%` }}
             >
               <img
+                ref={imgRef}
                 src={job.answerSheetPages[activePageIdx]}
                 alt={`Answer Sheet Page ${activePageIdx + 1}`}
+                onLoad={updateImgDimensions}
                 className="w-full h-auto block rounded-lg shadow-sm select-none"
               />
 
-              {/* SVG Bounding Box Highlights (GREEN for Matched, PURPLE for Unmatched) */}
+              {/* Dynamic SVG Bounding Box Overlay (Recalculated on ResizeObserver, Zoom & Load) */}
               <svg
                 className="absolute inset-0 w-full h-full pointer-events-none"
-                viewBox="0 0 100 100"
+                style={{
+                  width: imgDimensions.width ? `${imgDimensions.width}px` : "100%",
+                  height: imgDimensions.height ? `${imgDimensions.height}px` : "100%",
+                }}
+                viewBox={
+                  imgDimensions.width && imgDimensions.height
+                    ? `0 0 ${imgDimensions.width} ${imgDimensions.height}`
+                    : "0 0 100 100"
+                }
                 preserveAspectRatio="none"
               >
                 {job.answerSegments
@@ -387,30 +443,40 @@ export function TeacherSplitScreenFigma({ job }: TeacherSplitScreenFigmaProps) {
                     return isDirectlySelected || isMappedToSelectedQ;
                   })
                   .flatMap((seg) => {
-                    const isUnmatched = job.unmatchedAnswers.some((u) => u.answerSegmentId === seg.id);
+                    const isUnmatched = job.unmatchedAnswers.some(
+                      (u) => u.answerSegmentId === seg.id
+                    );
                     const pageBoxes = seg.boxes.filter((b) => (b.page ?? 0) === activePageIdx);
 
                     return pageBoxes.map((box, bIdx) => {
-                      const xPct = Math.max(box.x * 100, 1.5);
-                      const yPct = Math.max(box.y * 100, 1);
-                      const wPct = Math.min(box.w * 100, 97 - xPct);
-                      const hPct = Math.min(box.h * 100, 98 - yPct);
+                      const isPx = imgDimensions.width > 0 && imgDimensions.height > 0;
+                      const w = imgDimensions.width || 100;
+                      const h = imgDimensions.height || 100;
 
-                      // Colors: GREEN for matched answer, PURPLE for unmatched answer
-                      const fillCol = isUnmatched ? "rgba(168, 85, 247, 0.22)" : "rgba(34, 197, 94, 0.22)";
+                      // Compute pixel coordinates from rendered image dimensions
+                      const pixelX = isPx ? box.x * w : Math.max(box.x * 100, 1.5);
+                      const pixelY = isPx ? box.y * h : Math.max(box.y * 100, 1);
+                      const pixelW = isPx ? box.w * w : Math.min(box.w * 100, 97 - pixelX);
+                      const pixelH = isPx ? box.h * h : Math.min(box.h * 100, 98 - pixelY);
+
+                      const fillCol = isUnmatched
+                        ? "rgba(168, 85, 247, 0.22)"
+                        : "rgba(34, 197, 94, 0.22)";
                       const strokeCol = isUnmatched ? "#a855f7" : "#16a34a";
+                      const strokeWidth = isPx ? 3 : 0.45;
+                      const rx = isPx ? 6 : 0.6;
 
                       return (
                         <g key={`${seg.id}-${bIdx}`}>
                           <rect
-                            x={xPct}
-                            y={yPct}
-                            width={wPct}
-                            height={hPct}
+                            x={pixelX}
+                            y={pixelY}
+                            width={pixelW}
+                            height={pixelH}
                             fill={fillCol}
                             stroke={strokeCol}
-                            strokeWidth={0.45}
-                            rx={0.6}
+                            strokeWidth={strokeWidth}
+                            rx={rx}
                           />
                         </g>
                       );

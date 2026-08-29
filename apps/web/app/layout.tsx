@@ -15,11 +15,10 @@ export const metadata = {
   description: "Automated question extraction, handwritten answer mapping, and AI teacher assessment tool.",
   icons: {
     icon: [
-      { url: "/favicon.png", type: "image/png" },
       { url: "/veda_logo.png", type: "image/png" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png" },
     ],
-    shortcut: "/favicon.png",
+    shortcut: "/veda_logo.png",
     apple: "/veda_logo.png",
   },
 };
