@@ -63,7 +63,7 @@ vedaai/
 ### 3.1 Vercel Cron Job 10-Minute Data Cleanup (`vercel.json` & `/api/cron/clean-jobs`)
 - Scheduled via Vercel Cron Expression: `*/10 * * * *` (Executes every 10 minutes).
 - Automatically purges expired job entries from RAM and `/tmp/vedaai_jobs_store.json` once `createdAt` is older than 10 minutes (`TEN_MINUTES_MS = 600,000 ms`).
-- Includes authorization header check (`CRON_SECRET`) for secure production triggers.
+- Direct & Un-Authenticated Execution: No authentication or CRON_SECRET check is required, allowing Vercel Cron to invoke storage cleanup seamlessly every 10 minutes.
 
 ### 3.2 Dynamic ResizeObserver Highlight Alignment & Height Clamping (`TeacherSplitScreenFigma.tsx`)
 - **ResizeObserver & `imgRef` Binding**: Highlights dynamically recalculate pixel coordinates from `imgRef.current.getBoundingClientRect()` on window resize, zoom change, page switch, or container resize.
