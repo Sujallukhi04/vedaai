@@ -409,7 +409,7 @@ export function TeacherSplitScreenFigma({ job }: TeacherSplitScreenFigmaProps) {
           </div>
 
           {/* Answer Sheet Viewport with Dynamic ResizeObserver Bounding Box Overlay */}
-          <div className="bg-[#1e2022] p-2.5 sm:p-4 flex justify-center items-start overflow-auto rounded-3xl border border-slate-800 shadow-md h-auto max-h-[calc(100vh-200px)]">
+          <div className="bg-[#1e2022] p-3 sm:p-4 flex justify-center items-start overflow-auto rounded-3xl border border-slate-800 shadow-md min-h-[520px] md:min-h-[620px]">
             <div
               className="relative transition-all duration-200 max-w-full"
               style={{ width: `${zoomLevel}%` }}
